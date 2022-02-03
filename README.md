@@ -1,1 +1,1 @@
-# skocko-recko
+# Rečko (Skočko with letters)
