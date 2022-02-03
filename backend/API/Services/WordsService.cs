@@ -29,7 +29,7 @@ namespace Skocko.Api.Services
         private static void InitializeStaticFiles()
         {
             var loadedWords = File.ReadAllLines($"{AppContext.BaseDirectory}Files{Path.DirectorySeparatorChar}lat-all-5-letter-words-in-serbian.txt").ToList();
-            loadedWords = loadedWords.Select(word =>word.Trim().ToUpperInvariant()).ToList();
+            loadedWords = loadedWords.Select(word => word.Trim().ToUpperInvariant()).ToList();
             loadedWords = loadedWords.Where(word => word.Length == 5).ToList();
             AllExisting5LetterWords = loadedWords.ToHashSet();
 
@@ -100,17 +100,143 @@ namespace Skocko.Api.Services
                 return null;
             }
 
-            var wordOfTheDayAsArray = wordOfTheDay.ToList();
-            var userAttemptAsArray = userAttempt.ToList();
-
             var result = new GuessBodyResponse()
             {
-                FirstLetter = GetLetterStatus(wordOfTheDayAsArray, userAttemptAsArray, indexOfLetter:0),
-                SecondLetter = GetLetterStatus(wordOfTheDayAsArray, userAttemptAsArray, indexOfLetter: 1),
-                ThirdLetter = GetLetterStatus(wordOfTheDayAsArray, userAttemptAsArray, indexOfLetter: 2),
-                FourthLetter = GetLetterStatus(wordOfTheDayAsArray, userAttemptAsArray, indexOfLetter: 3),
-                FifthLetter = GetLetterStatus(wordOfTheDayAsArray, userAttemptAsArray, indexOfLetter: 4),
+                Status = GuessStatus.TryAgain,
+                FirstLetter = LetterStatus.DoesNotExistInWord,
+                SecondLetter = LetterStatus.DoesNotExistInWord,
+                ThirdLetter = LetterStatus.DoesNotExistInWord,
+                FourthLetter = LetterStatus.DoesNotExistInWord,
+                FifthLetter = LetterStatus.DoesNotExistInWord
             };
+
+            var usedUpCharacters = new bool[5];
+            var wordOfTheDayAsArray = wordOfTheDay.ToArray();
+            var userAttemptAsArray = userAttempt.ToArray();
+
+            // Check first correct guesses
+
+            if (wordOfTheDayAsArray[0] == userAttemptAsArray[0])
+            {
+                result.FirstLetter = LetterStatus.RightPlaceRightLetter;
+                usedUpCharacters[0] = true;
+            }
+
+            if (wordOfTheDayAsArray[1] == userAttemptAsArray[1])
+            {
+                result.SecondLetter = LetterStatus.RightPlaceRightLetter;
+                usedUpCharacters[1] = true;
+            }
+
+            if (wordOfTheDayAsArray[2] == userAttemptAsArray[2])
+            {
+                result.ThirdLetter = LetterStatus.RightPlaceRightLetter;
+                usedUpCharacters[2] = true;
+            }
+
+            if (wordOfTheDayAsArray[3] == userAttemptAsArray[3])
+            {
+                result.FourthLetter = LetterStatus.RightPlaceRightLetter;
+                usedUpCharacters[3] = true;
+            }
+
+            if (wordOfTheDayAsArray[4] == userAttemptAsArray[4])
+            {
+                result.FifthLetter = LetterStatus.RightPlaceRightLetter;
+                usedUpCharacters[4] = true;
+            }
+
+            // Check cointains in string somewhere
+
+            var letterIndex = 0;
+            if (!usedUpCharacters[letterIndex])
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    if (letterIndex == i || usedUpCharacters[i])
+                    {
+                        continue;
+                    }
+
+                    if (wordOfTheDayAsArray[i] == userAttemptAsArray[letterIndex])
+                    {
+                        usedUpCharacters[letterIndex] = true;
+                        result.FirstLetter = LetterStatus.ExistsButWrongPlace;
+                    }
+                }
+            }
+
+            letterIndex = 1;
+            if (!usedUpCharacters[letterIndex])
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    if (letterIndex == i || usedUpCharacters[i])
+                    {
+                        continue;
+                    }
+
+                    if (wordOfTheDayAsArray[i] == userAttemptAsArray[letterIndex])
+                    {
+                        usedUpCharacters[letterIndex] = true;
+                        result.SecondLetter = LetterStatus.ExistsButWrongPlace;
+                    }
+                }
+            }
+
+            letterIndex = 2;
+            if (!usedUpCharacters[letterIndex])
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    if (letterIndex == i || usedUpCharacters[i])
+                    {
+                        continue;
+                    }
+
+                    if (wordOfTheDayAsArray[i] == userAttemptAsArray[letterIndex])
+                    {
+                        usedUpCharacters[letterIndex] = true;
+                        result.ThirdLetter = LetterStatus.ExistsButWrongPlace;
+                    }
+                }
+            }
+
+            letterIndex = 3;
+            if (!usedUpCharacters[letterIndex])
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    if (letterIndex == i || usedUpCharacters[i])
+                    {
+                        continue;
+                    }
+
+                    if (wordOfTheDayAsArray[i] == userAttemptAsArray[letterIndex])
+                    {
+                        usedUpCharacters[letterIndex] = true;
+                        result.FourthLetter = LetterStatus.ExistsButWrongPlace;
+                    }
+                }
+            }
+
+            letterIndex = 4;
+            if (!usedUpCharacters[letterIndex])
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    if (letterIndex == i || usedUpCharacters[i])
+                    {
+                        continue;
+                    }
+
+                    if (wordOfTheDayAsArray[i] == userAttemptAsArray[letterIndex])
+                    {
+                        usedUpCharacters[letterIndex] = true;
+                        result.FifthLetter = LetterStatus.ExistsButWrongPlace;
+                    }
+                }
+            }
 
             if (result.FirstLetter == LetterStatus.RightPlaceRightLetter
                 && result.SecondLetter == LetterStatus.RightPlaceRightLetter
@@ -120,26 +246,6 @@ namespace Skocko.Api.Services
             {
                 result.Status = GuessStatus.Success;
             }
-            else
-            {
-                result.Status = GuessStatus.TryAgain;
-            }
-
-            return result;
-        }
-
-        private LetterStatus GetLetterStatus (List<char> word, List<char> attempt, int indexOfLetter)
-        {
-            var result = LetterStatus.DoesNotExistInWord;
-
-            if (attempt[indexOfLetter] == word[indexOfLetter])
-            {
-                result = LetterStatus.RightPlaceRightLetter;
-            }
-            else if (word.Contains(attempt[indexOfLetter]))
-            {
-                result = LetterStatus.ExistsButWrongPlace;
-            };
 
             return result;
         }

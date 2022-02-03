@@ -7,6 +7,7 @@ using System.Configuration;
 
 namespace Skocko.Api.Controllers
 {
+    [ApiController]
     public class WordsController : Controller
     {
         public WordsService WordsService { get; }
@@ -16,11 +17,6 @@ namespace Skocko.Api.Controllers
         {
             WordsService = wordsService;
             Configuration = configuration;
-        }
-
-        public IActionResult Index()
-        {
-            return View();
         }
 
         [HttpGet("api/words")]
@@ -98,13 +94,6 @@ namespace Skocko.Api.Controllers
             }
 
             response.TodayWordId = hashedWordOfTheDay;
-
-            //var decryptedWord = WordsService.GetDecryptedWord(encryptedWord: wordId);
-
-            //if (decryptedWord == null)
-            //{
-            //    return StatusCode(500, "Encryption service not working or incorrect wordId");
-            //}
 
             var checkedLettersResponse = await WordsService
                                                 .CheckLetters(wordOfTheDay: todaysWord, 
