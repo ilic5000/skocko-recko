@@ -1,0 +1,11 @@
+version: '2.4'
+
+services:
+  recko-api:
+    image: recko-api
+    env_file: .env
+    ports:
+      - "4055:80"
+    build:
+      context: backend/api
+      dockerfile: Dockerfile

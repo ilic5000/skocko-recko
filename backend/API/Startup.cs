@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Converters;
 using Skocko.Api.Middlewares;
+using Skocko.Api.Services;
 
 namespace Skocko.Api
 {
@@ -36,6 +37,9 @@ namespace Skocko.Api
 
             // configuration (resolvers, counter key builders)
             services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
+
+            services.AddScoped<WordsService>();
+            services.AddScoped<EncryptionService>();
 
             services.AddHttpContextAccessor();
 
