@@ -23,4 +23,4 @@ COPY --from=publish-env /app .
 
 RUN ls -l
 
-ENTRYPOINT ["dotnet", "API.dll"]
+ENTRYPOINT [dotnet, API.dll]
